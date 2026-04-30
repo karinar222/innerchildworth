@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inner Child Worth Rebuild Protocol</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f5f2f0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const WOUNDS = [
+      {
+        id: "rejection",
+        label: "Rejection",
+        icon: "🚪",
+        desc: "Being left out, abandoned, unwanted, or feeling like you didn't belong",
+        belief: "I am too much — or not enough — to be kept.",
+        age_pattern: "You learned to shrink yourself to avoid being left. You people-please, over-explain, or disappear before others can leave first.",
+        memory_prompt: "Think of the first time you felt truly unwanted. How old were you? What did you decide about yourself in that moment?",
+        reparent: [
+          "You were never too much. You were in the wrong room.",
+          "Being left was never about your worth. It was about their capacity.",
+          "You are deeply, permanently wanted — by life, by love, by the version of you still waiting to bloom.",
+          "I will not leave you. I am here now."
+        ],
+        affirmations: [
+          "I belong wherever I choose to be.",
+          "My presence is a gift, not a burden.",
+          "I am safe to take up space.",
+          "Love finds me because I am worthy of it."
+        ]
+      },
+      {
+        id: "comparison",
+        label: "Comparison",
+        icon: "⚖️",
+        desc: "Being measured against siblings, peers, or impossible standards and coming up short",
+        belief: "There is always someone better. I will never be enough as I am.",
+        age_pattern: "You became an achiever — always chasing the next thing to feel worthy. Or you gave up entirely, deciding the race was rigged before you even started.",
+        memory_prompt: "When did you first feel like you were being compared and found lacking? What were you told — directly or indirectly — about how you measured up?",
+        reparent: [
+          "You were never in a competition. You were always on your own path.",
+          "Your worth was never meant to be earned through comparison.",
+          "The child who was measured unfairly deserved better. You deserved to simply be celebrated for being you.",
+          "There is no one you need to beat to be worthy of love."
+        ],
+        affirmations: [
+          "I am incomparable. I am my own standard.",
+          "My value is inherent, not earned.",
+          "I celebrate myself without needing to be first.",
+          "I am enough exactly as I am, right now."
+        ]
+      },
+      {
+        id: "criticism",
+        label: "Criticism",
+        icon: "📣",
+        desc: "Harsh words, impossible expectations, or never feeling good enough no matter how hard you tried",
+        belief: "Something is fundamentally wrong with me.",
+        age_pattern: "You became hyper-vigilant — scanning for what might be wrong so you could fix it before anyone noticed. You work harder than you need to. You cannot rest. Rest feels dangerous.",
+        memory_prompt: "Whose voice do you still hear when you make a mistake? What did that voice tell you about who you are — not what you did, but who you are?",
+        reparent: [
+          "You were a child doing the best you could with what you had.",
+          "The harshness you received was never the truth about you. It was the pain of someone who didn't know how to love well.",
+          "You have nothing left to prove. You are allowed to be imperfect and still fully loved.",
+          "Your best has always been enough. I'm sorry nobody told you that sooner."
+        ],
+        affirmations: [
+          "I release the voice that was never mine.",
+          "My mistakes do not define my worth.",
+          "I am allowed to be a work in progress and still be loved.",
+          "I am safe to be imperfect."
+        ]
+      },
+      {
+        id: "invisibility",
+        label: "Invisibility",
+        icon: "👻",
+        desc: "Being overlooked, dismissed, or feeling like your needs and feelings didn't matter",
+        belief: "My feelings don't matter. I don't matter.",
+        age_pattern: "You learned to need nothing, feel nothing — or feel everything quietly alone. You have trouble asking for help. You minimize your own pain. You say 'I'm fine' before anyone asks.",
+        memory_prompt: "When did you first learn that your needs were too much, or that your feelings weren't safe to express? Who taught you to disappear?",
+        reparent: [
+          "Your needs have always mattered — even when they were treated like they didn't.",
+          "Your feelings were real and valid. Every single one of them.",
+          "You deserved someone who asked how you were and actually wanted to know.",
+          "I see you now. Completely. And you are not invisible to me."
+        ],
+        affirmations: [
+          "My needs matter and deserve to be met.",
+          "I am allowed to be seen and heard.",
+          "Asking for help is an act of strength.",
+          "I am worthy of care, attention, and love."
+        ]
+      },
+      {
+        id: "shame",
+        label: "Shame",
+        icon: "🫂",
+        desc: "Being made to feel fundamentally bad, broken, or wrong for who you are",
+        belief: "I am broken. If people truly knew me, they would leave.",
+        age_pattern: "You became a master of masks. High-functioning on the outside, quietly falling apart inside. You fear being truly known. Intimacy feels dangerous. You perform okayness.",
+        memory_prompt: "When were you first made to feel ashamed of yourself — not of something you did, but of who you are? What part of you did you learn to hide?",
+        reparent: [
+          "You were never broken. You were a sensitive soul in an environment that couldn't hold you.",
+          "The parts of you that were shamed are often your greatest gifts in disguise.",
+          "You do not need to earn your place here. You belong exactly as you are.",
+          "I am not afraid of your wholeness. Show me all of you."
+        ],
+        affirmations: [
+          "I am whole, not broken.",
+          "I am safe to be fully known and still loved.",
+          "My sensitivity is a strength, not a flaw.",
+          "I release shame that was never mine to carry."
+        ]
+      }
+    ];
+
+    const STAGES = ["welcome", "wound", "witness", "reparent", "install", "anchor"];
+
+    function App() {
+      const [stage, setStage] = useState("welcome");
+      const [selectedWound, setSelectedWound] = useState(null);
+      const [breath, setBreath] = useState(false);
+      const [breathPhase, setBreathPhase] = useState("inhale");
+      const [breathCount, setBreathCount] = useState(0);
+      const [currentAffirm, setCurrentAffirm] = useState(0);
+      const [revealed, setRevealed] = useState([]);
+      const [journalText, setJournalText] = useState("");
+      const [fade, setFade] = useState(true);
+      const breathRef = useRef(null);
+      const containerRef = useRef(null);
+
+      const wound = WOUNDS.find(w => w.id === selectedWound);
+
+      const go = (next) => {
+        setFade(false);
+        setTimeout(() => {
+          setStage(next);
+          setFade(true);
+          if (containerRef.current) containerRef.current.scrollTop = 0;
+        }, 350);
+      };
+
+      useEffect(() => {
+        if (stage === "reparent" && breath) {
+          const cycle = () => {
+            setBreathPhase("inhale");
+            breathRef.current = setTimeout(() => {
+              setBreathPhase("hold");
+              breathRef.current = setTimeout(() => {
+                setBreathPhase("exhale");
+                breathRef.current = setTimeout(() => {
+                  setBreathCount(c => c + 1);
+                  cycle();
+                }, 6000);
+              }, 1500);
+            }, 4000);
+          };
+          cycle();
+          return () => clearTimeout(breathRef.current);
+        }
+      }, [stage, breath]);
+
+      useEffect(() => {
+        if (stage === "install" && wound) {
+          const t = setInterval(() => {
+            setCurrentAffirm(c => (c + 1) % wound.affirmations.length);
+          }, 3500);
+          return () => clearInterval(t);
+        }
+      }, [stage, wound]);
+
+      const revealReparent = (i) => {
+        setRevealed(prev => prev.includes(i) ? prev : [...prev, i]);
+      };
+
+      const breathLabel = breathPhase === "inhale" ? "Breathe in..." : breathPhase === "hold" ? "Hold..." : "Release...";
+
+      return (
+        <div ref={containerRef} style={{ fontFamily: "'EB Garamond', Georgia, serif", minHeight: "100vh", background: "#f5f2f0", overflowY: "auto", position: "relative" }}>
+          <style>{`
+            * { margin:0; padding:0; box-sizing:border-box; }
+            .ic-fade { opacity:0; transform:translateY(10px); transition:all 0.4s ease; }
+            .ic-fade.in { opacity:1; transform:translateY(0); }
+            .ic-topbar { display:flex; justify-content:space-between; align-items:center; padding:18px 28px 14px; border-bottom:1px solid #d0cac4; }
+            .ic-topbar-title { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1px; color:#3a3535; font-weight:400; }
+            .ic-topbar-num { font-family:'DM Mono',monospace; font-size:11px; color:#9b8a88; letter-spacing:1px; }
+            .ic-orb-wrap { display:flex; justify-content:center; padding:32px 28px 24px; position:relative; }
+            .ic-orb { width:260px; height:260px; border-radius:50%; position:relative; filter:url(#grain); }
+            .ic-orb-inner { width:100%; height:100%; border-radius:50%; background:radial-gradient(circle at 48% 44%, #f5a0e0 0%, #f06ba8 28%, #d94080 55%, #b82060 80%, rgba(245,242,240,0) 100%); animation:orb-breathe 4s ease-in-out infinite; }
+            .ic-orb-inner.pulse { animation:orb-pulse 2s ease-in-out infinite; }
+            @keyframes orb-breathe { 0%,100%{transform:scale(1);opacity:.92} 50%{transform:scale(1.05);opacity:1} }
+            @keyframes orb-pulse { 0%,100%{transform:scale(.97)} 50%{transform:scale(1.06)} }
+            .ic-orb-inner.inhale { animation:orb-inhale 4s ease-in forwards; }
+            .ic-orb-inner.hold { animation:none; transform:scale(1.15); }
+            .ic-orb-inner.exhale { animation:orb-exhale 6s ease-out forwards; }
+            @keyframes orb-inhale { from{transform:scale(.85)} to{transform:scale(1.15)} }
+            @keyframes orb-exhale { from{transform:scale(1.15)} to{transform:scale(.85)} }
+            .ic-inner { max-width:620px; margin:0 auto; padding:0 28px 80px; }
+            .ic-eyebrow { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#b87a90; margin-bottom:12px; font-weight:500; }
+            .ic-h1 { font-size:clamp(26px,5vw,38px); font-weight:500; color:#2a2020; line-height:1.25; margin-bottom:16px; letter-spacing:-0.5px; }
+            .ic-h1 em { font-style:italic; color:#c94070; }
+            .ic-h2 { font-size:22px; font-weight:500; color:#2a2020; margin-bottom:12px; line-height:1.4; }
+            .ic-body { font-size:16px; line-height:1.9; color:#5a4a48; margin-bottom:20px; }
+            .ic-italic { font-style:italic; font-size:17px; line-height:1.85; color:#7a5a58; margin-bottom:24px; }
+            .ic-divider { border:none; border-top:1px solid #d0cac4; margin:24px 0; }
+            .ic-wound-grid { display:flex; flex-direction:column; gap:12px; margin:20px 0; }
+            .ic-wound-card { padding:20px 22px; background:white; border:1px solid #ddd5d0; border-radius:4px; cursor:pointer; transition:all 0.2s; display:flex; gap:16px; align-items:flex-start; }
+            .ic-wound-card:hover { background:#fff5f8; border-color:#d94080; }
+            .ic-wound-card.selected { background:#fff0f5; border-color:#d94080; border-width:1.5px; }
+            .ic-wound-icon { font-size:22px; margin-top:2px; min-width:28px; }
+            .ic-wound-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#b87a90; margin-bottom:4px; font-weight:500; }
+            .ic-wound-desc { font-size:14px; line-height:1.65; color:#6a5050; }
+            .ic-btn { display:inline-block; padding:14px 36px; background:#d94080; color:white; border:none; border-radius:2px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; font-weight:500; }
+            .ic-btn:hover { background:#c03060; transform:translateY(-1px); }
+            .ic-btn:disabled { background:#ccc; cursor:not-allowed; transform:none; }
+            .ic-belief { background:#fff0f5; border-left:3px solid #d94080; padding:20px 22px; border-radius:0 4px 4px 0; margin:20px 0; }
+            .ic-belief-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:#b87a90; margin-bottom:8px; font-weight:500; }
+            .ic-belief-text { font-style:italic; font-size:18px; line-height:1.6; color:#3a2020; }
+            .ic-journal { width:100%; min-height:140px; background:white; border:1px solid #ddd5d0; border-radius:4px; padding:18px; font-family:'EB Garamond',Georgia,serif; font-size:16px; line-height:1.85; color:#3a2020; resize:vertical; outline:none; transition:border-color 0.2s; margin:16px 0; }
+            .ic-journal:focus { border-color:#d94080; }
+            .ic-reparent-card { padding:22px 24px; background:white; border:1px solid #ddd5d0; border-radius:4px; margin-bottom:12px; cursor:pointer; transition:all 0.3s; position:relative; }
+            .ic-reparent-card.unrevealed { background:#f5f2f0; border-style:dashed; text-align:center; color:#b87a90; font-style:italic; font-size:14px; letter-spacing:0.5px; }
+            .ic-reparent-card.revealed { background:#fff5f8; border-color:#d0a0b0; }
+            .ic-reparent-card.revealed p { font-style:italic; font-size:17px; line-height:1.75; color:#3a2020; }
+            .ic-breath-ui { text-align:center; padding:16px 0 8px; }
+            .ic-breath-phase { font-family:'DM Mono',monospace; font-size:12px; letter-spacing:3px; text-transform:uppercase; color:#b87a90; margin-bottom:6px; height:20px; font-weight:500; }
+            .ic-breath-count { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; color:#c0a0a8; font-weight:400; }
+            .ic-affirm-display { text-align:center; padding:40px 20px; position:relative; }
+            .ic-affirm-orb-mini { width:80px; height:80px; border-radius:50%; background:radial-gradient(circle at 45% 40%, #f5a0e0 0%, #f06ba8 35%, #d94080 65%, rgba(245,242,240,0) 100%); margin:0 auto 28px; animation:orb-breathe 4s ease-in-out infinite; }
+            .ic-affirm-text { font-size:clamp(20px,4vw,28px); font-style:italic; line-height:1.5; color:#2a2020; transition:opacity 0.6s ease; min-height:80px; display:flex; align-items:center; justify-content:center; }
+            .ic-affirm-dots { display:flex; gap:8px; justify-content:center; margin-top:24px; }
+            .ic-dot { width:6px; height:6px; border-radius:50%; background:#ddd; transition:background 0.3s; cursor:pointer; }
+            .ic-dot.active { background:#d94080; }
+            .ic-anchor-list { margin:20px 0; }
+            .ic-anchor-item { display:flex; gap:14px; padding:16px 0; border-bottom:1px solid #e8e0da; align-items:flex-start; }
+            .ic-anchor-num { font-family:'DM Mono',monospace; font-size:10px; color:#d94080; min-width:24px; font-weight:500; padding-top:3px; }
+            .ic-anchor-text { font-size:15px; line-height:1.75; color:#5a4a48; }
+            .ic-bottombar { border-top:1px solid #d0cac4; padding:14px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; bottom:0; background:#f5f2f0; z-index:10; }
+            .ic-progress { display:flex; gap:5px; }
+            .ic-pip { width:18px; height:3px; border-radius:2px; background:#ddd; transition:background 0.3s; }
+            .ic-pip.done { background:#d94080; }
+            .ic-pip.current { background:#f06ba8; }
+            @media(max-width:580px){ .ic-inner{padding:0 18px 80px} .ic-topbar{padding:14px 18px} .ic-orb{width:200px;height:200px} .ic-btn{padding:13px 24px} }
+          `}</style>
+
+          <svg style={{ position:"absolute", width:0, height:0 }}>
+            <defs>
+              <filter id="grain">
+                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise" />
+                <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise" />
+                <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="blended" />
+                <feComposite in="blended" in2="SourceGraphic" operator="in" />
+              </filter>
+            </defs>
+          </svg>
+
+          <div className="ic-topbar">
+            <div className="ic-topbar-title">I am Worthy</div>
+            <div className="ic-topbar-num">444</div>
+          </div>
+
+          <div className="ic-orb-wrap">
+            <div className="ic-orb">
+              <div className={`ic-orb-inner ${stage === "reparent" && breath ? breathPhase : stage === "anchor" ? "pulse" : ""}`} />
+            </div>
+            {stage === "reparent" && breath && (
+              <div style={{ position:"absolute", bottom:20, width:"100%", textAlign:"center" }}>
+                <div className="ic-breath-phase">{breathLabel}</div>
+                {breathCount > 0 && <div className="ic-breath-count">Breath {breathCount} ✦</div>}
+              </div>
+            )}
+          </div>
+
+          <div style={{ borderTop:"1px solid #d0cac4", padding:"10px 28px", marginBottom:28, overflow:"hidden", whiteSpace:"nowrap" }}>
+            <div style={{ fontFamily:"'DM Mono',monospace", fontSize:11, letterSpacing:3, textTransform:"uppercase", color:"#3a3535" }}>
+              INNER CHILD WORTH REBUILD PROTOCOL &nbsp;&nbsp;✦&nbsp;&nbsp; INNER CHILD WORTH REBUILD PROTOCOL &nbsp;&nbsp;✦&nbsp;&nbsp; DEEP HEALING ANCHOR
+            </div>
+          </div>
+
+          <div className="ic-inner">
+            <div className={`ic-fade ${fade ? "in" : ""}`}>
+
+              {stage === "welcome" && (
+                <div>
+                  <div className="ic-eyebrow">✦ Deep Healing Anchor</div>
+                  <h1 className="ic-h1">Inner Child Worth<br /><em>Rebuild Protocol</em></h1>
+                  <p className="ic-body">"I've felt this way my whole life — and I don't know why."</p>
+                  <p className="ic-body">Sweet one — you are not broken. You never were.</p>
+                  <p className="ic-body">Most of the "not enough" story started long before adulthood. Before the heartaches. Before the career struggles. Before the exhaustion of trying to prove yourself in a world that never quite made you feel like you belonged. You were carrying this long before you had words for it.</p>
+                  <p className="ic-body">It started the first time someone's words — or their silence — made you decide something about who you were. And that tender, younger part of you has been quietly doing her best to protect you ever since.</p>
+                  <p className="ic-body">Today, we go back for her. Gently. Together.</p>
+                  <hr className="ic-divider" />
+                  <div className="ic-belief" style={{ background:"#fff5f8", borderLeft:"3px solid #f06ba8" }}>
+                    <div className="ic-belief-label">This Protocol Will</div>
+                    <div style={{ fontFamily:"'EB Garamond',Georgia,serif" }}>
+                      {["Identify your original emotional wound","Witness and validate the younger you","Re-parent with the love that was missing","Install safety + worthiness at the root level"].map((item, i) => (
+                        <div key={i} style={{ display:"flex", gap:12, alignItems:"flex-start", marginBottom:8 }}>
+                          <span style={{ color:"#d94080", fontSize:12, marginTop:5 }}>✦</span>
+                          <span style={{ fontSize:15.5, lineHeight:1.7, color:"#5a4a48" }}>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="ic-italic" style={{ marginTop:20 }}>Find a quiet place. Wrap your arms around yourself if it feels right. Put one hand on your heart. You are so safe here. You have always been safe here.</p>
+                  <button className="ic-btn" onClick={() => go("wound")}>Begin the Protocol ✦</button>
+                </div>
+              )}
+
+              {stage === "wound" && (
+                <div>
+                  <div className="ic-eyebrow">✦ Step One — Identify the Root</div>
+                  <h2 className="ic-h2">Which wound feels most familiar?</h2>
+                  <p className="ic-body">You may recognize yourself in more than one. That's okay, love. Choose the one that sits heaviest in your chest — the one that makes some quiet part of you whisper <em>"yes. that's the one."</em></p>
+                  <div className="ic-wound-grid">
+                    {WOUNDS.map(w => (
+                      <div key={w.id} className={`ic-wound-card ${selectedWound === w.id ? "selected" : ""}`} onClick={() => setSelectedWound(w.id)}>
+                        <div className="ic-wound-icon">{w.icon}</div>
+                        <div>
+                          <div className="ic-wound-label">{w.label}</div>
+                          <div className="ic-wound-desc">{w.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop:24 }}>
+                    <button className="ic-btn" disabled={!selectedWound} onClick={() => go("witness")}>This Is Mine ✦</button>
+                  </div>
+                </div>
+              )}
+
+              {stage === "witness" && wound && (
+                <div>
+                  <div className="ic-eyebrow">✦ Step Two — Bear Witness</div>
+                  <h2 className="ic-h2">The wound of <em style={{ fontStyle:"italic", color:"#c94070" }}>{wound.label}</em></h2>
+                  <div className="ic-belief">
+                    <div className="ic-belief-label">The Core Belief It Created</div>
+                    <div className="ic-belief-text">"{wound.belief}"</div>
+                  </div>
+                  <p className="ic-body" style={{ marginTop:20 }}>{wound.age_pattern}</p>
+                  <hr className="ic-divider" />
+                  <div className="ic-eyebrow" style={{ marginBottom:8 }}>✦ Journal Prompt</div>
+                  <p className="ic-italic">{wound.memory_prompt}</p>
+                  <textarea className="ic-journal" placeholder="Write whatever comes. There is no wrong answer. This is just for you." value={journalText} onChange={e => setJournalText(e.target.value)} />
+                  <p style={{ fontSize:13, color:"#b87a90", fontStyle:"italic", marginBottom:20, fontFamily:"'EB Garamond',Georgia,serif" }}>Take as long as you need. When you're ready, continue.</p>
+                  <button className="ic-btn" onClick={() => { setRevealed([]); go("reparent"); }}>I'm Ready to Be Re-Parented ✦</button>
+                </div>
+              )}
+
+              {stage === "reparent" && wound && (
+                <div>
+                  <div className="ic-eyebrow">✦ Step Three — Re-Parenting</div>
+                  <h2 className="ic-h2">What the younger you needed to hear</h2>
+                  {!breath ? (
+                    <>
+                      <p className="ic-body">Place both hands on your heart. Take three slow, deep breaths and let your shoulders drop. Let your jaw unclench. Let your belly soften.</p>
+                      <p className="ic-italic">What you're about to receive is what she has been waiting to hear for a very long time. You are finally here for her. Let that land.</p>
+                      <button className="ic-btn" onClick={() => setBreath(true)}>Start Breathing Guide ✦</button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="ic-breath-ui"><div className="ic-breath-phase">{breathLabel}</div></div>
+                      <p className="ic-body" style={{ marginTop:8, textAlign:"center", fontSize:14, fontStyle:"italic" }}>Reveal each message when you're ready. Let it land fully before moving on.</p>
+                    </>
+                  )}
+                  <div style={{ marginTop:24 }}>
+                    {wound.reparent.map((msg, i) => (
+                      <div key={i} className={`ic-reparent-card ${revealed.includes(i) ? "revealed" : "unrevealed"}`} onClick={() => !revealed.includes(i) && breath && revealReparent(i)} style={{ cursor: revealed.includes(i) || !breath ? "default" : "pointer" }}>
+                        {revealed.includes(i) ? <p>{msg}</p> : <span>Tap to receive {i === 0 ? "your first message" : i === 1 ? "your second message" : i === 2 ? "your third message" : "your final message"} ✦</span>}
+                      </div>
+                    ))}
+                  </div>
+                  {revealed.length === wound.reparent.length && (
+                    <div style={{ marginTop:24 }}>
+                      <p className="ic-italic" style={{ textAlign:"center", marginBottom:20 }}>Take a breath. Let that settle into your body.</p>
+                      <button className="ic-btn" onClick={() => { setBreath(false); go("install"); }}>Install Worthiness ✦</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {stage === "install" && wound && (
+                <div>
+                  <div className="ic-eyebrow">✦ Step Four — Installing Worthiness</div>
+                  <h2 className="ic-h2" style={{ textAlign:"center" }}>Your new root-level truths</h2>
+                  <p className="ic-body">Read each one aloud if you can. Feel where it lands — in your throat, your chest, your belly. Notice any resistance with gentleness, not judgment. That resistance is old armor. It kept you safe once. You don't need it anymore.</p>
+                  <div className="ic-affirm-display">
+                    <div className="ic-affirm-orb-mini" />
+                    <div className="ic-affirm-text">"{wound.affirmations[currentAffirm]}"</div>
+                    <div className="ic-affirm-dots">
+                      {wound.affirmations.map((_, i) => (
+                        <div key={i} className={`ic-dot ${i === currentAffirm ? "active" : ""}`} onClick={() => setCurrentAffirm(i)} />
+                      ))}
+                    </div>
+                  </div>
+                  <hr className="ic-divider" />
+                  <p className="ic-italic" style={{ textAlign:"center" }}>Say your deepest one three times, hand on heart, eyes closed. Let your body learn a new language for itself.</p>
+                  <div style={{ textAlign:"center", marginTop:28 }}>
+                    <button className="ic-btn" onClick={() => go("anchor")}>Anchor It In ✦</button>
+                  </div>
+                </div>
+              )}
+
+              {stage === "anchor" && wound && (
+                <div>
+                  <div className="ic-eyebrow">✦ Step Five — Living Anchor</div>
+                  <h2 className="ic-h2">You've done something real today.</h2>
+                  <p className="ic-body">Something real shifted in you today, love. Not just an exercise — an act of genuine homecoming. The younger version of you who carried the wound of <em style={{ fontStyle:"italic", color:"#c94070" }}>{wound.label.toLowerCase()}</em> has been seen, held, and offered something she always deserved.</p>
+                  <p className="ic-body">She doesn't have to run things from the shadows anymore. You are here now. And you are more than enough to lead the way.</p>
+                  <p className="ic-body">Healing is not a straight line — it's a spiral. Each time you return, you go a little deeper. Here is how to keep tending to her:</p>
+                  <div className="ic-anchor-list">
+                    {[
+                      { n:"01", t:`When the old belief "${wound.belief}" surfaces, name it out loud: "That's my wound speaking. That's not my truth anymore."` },
+                      { n:"02", t:`Return to the orb above when you feel the wound activating. Place your hand on your heart. Breathe until your body softens.` },
+                      { n:"03", t:`Say your anchor affirmation every morning before you look at your phone. Let it be the first thing your nervous system hears.` },
+                      { n:"04", t:`Notice when you're making decisions from the wound — rushing to please, withdrawing, overworking, hiding. Pause. Ask: "What does my healed self choose here?"` },
+                      { n:"05", t:`You are allowed to repeat this protocol anytime the wound feels loud. Healing is not linear. Each return is not a failure — it's a deeper layer being tended.` }
+                    ].map((item, i) => (
+                      <div className="ic-anchor-item" key={i}>
+                        <div className="ic-anchor-num">{item.n}</div>
+                        <div className="ic-anchor-text">{item.t}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <hr className="ic-divider" />
+                  <div className="ic-belief" style={{ background:"#fff5f8", borderLeft:"3px solid #f06ba8", textAlign:"center" }}>
+                    <div className="ic-belief-label" style={{ textAlign:"center" }}>Your Worthiness Declaration</div>
+                    <div className="ic-belief-text" style={{ fontStyle:"italic", textAlign:"center" }}>"{wound.affirmations[0]}"</div>
+                    <div style={{ marginTop:8, fontStyle:"italic", fontSize:15, color:"#d94080", fontFamily:"'EB Garamond',Georgia,serif" }}>— {wound.affirmations[2]}</div>
+                  </div>
+                  <p className="ic-italic" style={{ textAlign:"center", marginTop:28 }}>
+                    You are not too much. You were never too much.<br />
+                    You are a woman remembering<br />
+                    what has always, already been true about her.<br /><br />
+                    Welcome home, love. ✦
+                  </p>
+                  <div style={{ textAlign:"center", marginTop:32 }}>
+                    <button className="ic-btn" onClick={() => { setStage("welcome"); setSelectedWound(null); setJournalText(""); setRevealed([]); setBreath(false); setBreathCount(0); setCurrentAffirm(0); }}>
+                      Begin Again ✦
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          <div className="ic-bottombar">
+            <div style={{ fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:2, color:"#b87a90", textTransform:"uppercase", fontWeight:500 }}>
+              {stage === "welcome" ? "Ready" : stage === "wound" ? "Identifying" : stage === "witness" ? "Witnessing" : stage === "reparent" ? "Re-Parenting" : stage === "install" ? "Installing" : "Anchored"}
+            </div>
+            <div className="ic-progress">
+              {STAGES.map((s, i) => (
+                <div key={s} className={`ic-pip ${STAGES.indexOf(stage) > i ? "done" : STAGES.indexOf(stage) === i ? "current" : ""}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
